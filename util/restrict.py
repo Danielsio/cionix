@@ -1,8 +1,7 @@
 from util.file_explorer import disable_explorer, enable_explorer
-from util.mouse import MouseLocker
 from util.alt_tab import AltTabBlocker
 from util.logger import logger
-from util.focus import FocusEnforcer  # Import the new FocusEnforcer class
+from util.focus import FocusEnforcer
 
 class RestrictionManager:
     def __init__(self, app):
@@ -11,7 +10,6 @@ class RestrictionManager:
         :param app: The root application instance (Tk instance).
         """
         self.app = app
-        self.mouse_locker = MouseLocker(app)
         self.alt_tab_blocker = AltTabBlocker(app)
         self.focus_enforcer = FocusEnforcer(app)  # Create an instance of FocusEnforcer
         self.restrictions_active = False
@@ -22,7 +20,6 @@ class RestrictionManager:
             logger.info("Starting restrictions")
             disable_explorer()
             self.alt_tab_blocker.disable_alt_tab()
-            # self.mouse_locker.lock_mouse()
             self.app.attributes('-topmost', True)  # Make the window always on top
             self.focus_enforcer.enforce_focus()
             self.restrictions_active = True
@@ -34,7 +31,6 @@ class RestrictionManager:
             logger.info("Stopping restrictions")
             enable_explorer()
             self.alt_tab_blocker.enable_alt_tab()
-            # self.mouse_locker.unlock_mouse()
             self.app.attributes('-topmost', False)  # Disable always on top
             self.focus_enforcer.reverse_focus()
             self.restrictions_active = False
