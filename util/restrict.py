@@ -20,8 +20,7 @@ class RestrictionManager:
             logger.info("Starting restrictions")
             disable_explorer()
             self.alt_tab_blocker.disable_alt_tab()
-            self.app.attributes('-topmost', True)  # Make the window always on top
-            self.focus_enforcer.enforce_focus()
+            # self.focus_enforcer.enforce_focus()
             self.restrictions_active = True
             logger.debug("File Explorer disabled, mouse locked, and Alt+Tab disabled")
 
@@ -31,7 +30,6 @@ class RestrictionManager:
             logger.info("Stopping restrictions")
             enable_explorer()
             self.alt_tab_blocker.enable_alt_tab()
-            self.app.attributes('-topmost', False)  # Disable always on top
-            self.focus_enforcer.reverse_focus()
+            # self.focus_enforcer.reverse_focus()
             self.restrictions_active = False
             logger.debug("File Explorer enabled, mouse unlocked, and Alt+Tab enabled")

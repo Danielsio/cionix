@@ -24,26 +24,26 @@ class LoginScreen(ctk.CTkFrame):
 
         # Title
         self.title_label = ctk.CTkLabel(
-            self.wrapper_frame, text="Welcome Back!", font=("Arial", 36, "bold")
+            self.wrapper_frame, text="!ברוך שובך", font=("Arial", 36, "bold")
         )
         self.title_label.grid(row=0, column=0, pady=(0, 30))  # Space below title
 
-        # Email Entry
+        # Email Entry (Right Aligned)
         self.email_entry = ctk.CTkEntry(
-            self.wrapper_frame, placeholder_text="Email", width=400, height=40
+            self.wrapper_frame, placeholder_text="אימייל", justify="right", width=400, height=40
         )
         self.email_entry.grid(row=1, column=0, pady=10)
 
-        # Password Entry
+        # Password Entry (Right Aligned)
         self.password_entry = ctk.CTkEntry(
-            self.wrapper_frame, placeholder_text="Password", show="*", width=400, height=40
+            self.wrapper_frame, placeholder_text="סיסמה", justify="right", show="*", width=400, height=40
         )
         self.password_entry.grid(row=2, column=0, pady=10)
 
         # Forgot Password Link
         self.reset_password_link = ctk.CTkLabel(
             self.wrapper_frame,
-            text="Forgot your password?",
+            text="?שכחת את הסיסמה שלך",
             cursor="hand2",
             font=("Arial", 14, "underline"),
             text_color="lightblue",
@@ -53,14 +53,14 @@ class LoginScreen(ctk.CTkFrame):
 
         # Login Button
         self.login_button = ctk.CTkButton(
-            self.wrapper_frame, text="Login", command=self.login, width=200, height=40
+            self.wrapper_frame, text="התחבר", command=self.login, width=200, height=40
         )
         self.login_button.grid(row=4, column=0, pady=(10, 20))  # Space above and below button
 
         # Register Link
         self.register_link = ctk.CTkLabel(
             self.wrapper_frame,
-            text="Don't have an account? Register here",
+            text="אין לך חשבון? הירשם כאן!",
             cursor="hand2",
             font=("Arial", 14, "underline"),
             text_color="lightblue",
@@ -77,14 +77,15 @@ class LoginScreen(ctk.CTkFrame):
         password = self.password_entry.get()
         logger.info(f"Attempting login for email: {email}")
 
+        # Call to the authentication system
         response = Auth.login(email, password)
 
         if "error" in response:
             logger.error(f"Login failed: {response['error']}")
-            messagebox.showerror("Login Failed", response["error"])
+            messagebox.showerror("שגיאה", response["error"])  # Show error in Hebrew
         else:
             logger.info("Login successful")
-            messagebox.showinfo("Success", "Login successful!")
+            messagebox.showinfo("הצלחה", "התחברת בהצלחה!")  # Login successful in Hebrew
             logger.info("Navigating to MainUI")
             self.master.switch_frame(MainUI, response)
 
@@ -99,14 +100,14 @@ class LoginScreen(ctk.CTkFrame):
         email = self.email_entry.get()
         if not email:
             logger.warning("Reset password attempt without email")
-            messagebox.showerror("Error", "Please enter your email to reset your password.")
+            messagebox.showerror("שגיאה", "אנא הזן את האימייל שלך כדי לאפס את הסיסמה.")
             return
 
         logger.info(f"Attempting to send password reset link for email: {email}")
         response = Auth.reset_password(email)
         if "error" in response:
             logger.error(f"Password reset failed: {response['error']}")
-            messagebox.showerror("Error", response["error"])
+            messagebox.showerror("שגיאה", response["error"])
         else:
             logger.info("Password reset link sent successfully")
-            messagebox.showinfo("Success", "Password reset link sent to your email!")
+            messagebox.showinfo("הצלחה", "קישור לאיפוס הסיסמה נשלח לאימייל שלך!")
