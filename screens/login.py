@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from tkinter import messagebox
-from auth.auth import Auth
+from auth import FirebaseAuth
 from screens.main_ui import MainUI
 from util.logger import logger
 
@@ -60,7 +60,7 @@ class LoginScreen(ctk.CTkFrame):
         # Register Link
         self.register_link = ctk.CTkLabel(
             self.wrapper_frame,
-            text="אין לך חשבון? הירשם כאן!",
+            text="!אין לך חשבון? הירשם כאן",
             cursor="hand2",
             font=("Arial", 14, "underline"),
             text_color="lightblue",
@@ -78,7 +78,7 @@ class LoginScreen(ctk.CTkFrame):
         logger.info(f"Attempting login for email: {email}")
 
         # Call to the authentication system
-        response = Auth.login(email, password)
+        response = FirebaseAuth.login(email, password)
 
         if "error" in response:
             logger.error(f"Login failed: {response['error']}")
@@ -104,7 +104,7 @@ class LoginScreen(ctk.CTkFrame):
             return
 
         logger.info(f"Attempting to send password reset link for email: {email}")
-        response = Auth.reset_password(email)
+        response = FirebaseAuth.reset_password(email)
         if "error" in response:
             logger.error(f"Password reset failed: {response['error']}")
             messagebox.showerror("שגיאה", response["error"])

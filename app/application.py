@@ -17,6 +17,7 @@ class App(ctk.CTk):
         # Full-screen mode
         self.attributes("-fullscreen", True)
         self.overrideredirect(True)  # Hide window decorations
+
         logger.info("Full-screen mode enabled")
 
         # Disable Task Manager for the app lifecycle
@@ -65,10 +66,15 @@ class App(ctk.CTk):
 
     def switch_frame(self, frame_class, *args):
         """Switches to a new frame."""
+        logger.info(f"Switching Frame to {frame_class.__name__}")
+
         if self.current_frame:
             self.current_frame.destroy()
-        self.current_frame = frame_class(self, *args)
-        self.current_frame.pack(fill="both", expand=True)
 
-        # The frame itself decides whether to start or stop restrictions
-        logger.info(f"Switched to {frame_class.__name__}")
+        try:
+            self.current_frame = frame_class(self, *args)
+            self.current_frame.pack(fill="both", expand=True)
+            logger.info(f"Switched to {frame_class.__name__}")
+        except Exception as e:
+            logger.error(f"Failed to switch to {frame_class.__name__}: {e}")
+            raise

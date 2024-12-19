@@ -32,7 +32,7 @@ if os.path.exists(OLD_LOG_FILE):
 if not logging.getLogger("PCUsageManager").hasHandlers():
     # Configure logging
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] [%(module)s:%(funcName)s] %(message)s",
         handlers=[
             logging.FileHandler(LOG_FILE),  # Log to file

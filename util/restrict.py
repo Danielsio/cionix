@@ -19,7 +19,7 @@ class RestrictionManager:
         if not self.restrictions_active:
             logger.info("Starting restrictions")
             disable_explorer()
-            self.alt_tab_blocker.disable_alt_tab()
+            # self.alt_tab_blocker.disable_alt_tab()
             # self.focus_enforcer.enforce_focus()
             self.restrictions_active = True
             logger.debug("File Explorer disabled, mouse locked, and Alt+Tab disabled")
@@ -29,7 +29,7 @@ class RestrictionManager:
         if self.restrictions_active:
             logger.info("Stopping restrictions")
             enable_explorer()
-            self.alt_tab_blocker.enable_alt_tab()
             # self.focus_enforcer.reverse_focus()
+            # self.alt_tab_blocker.enable_alt_tab()
             self.restrictions_active = False
             logger.debug("File Explorer enabled, mouse unlocked, and Alt+Tab enabled")
