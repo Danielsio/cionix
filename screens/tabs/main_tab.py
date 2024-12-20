@@ -1,15 +1,16 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from auth import FirebaseAuth
-from util.time_utils import format_time
+from util.time_utils import format_time, format_time_dd_hh_mm_ss
 from util.logger import logger
 from config import db
-
 
 class MainTab(ctk.CTkFrame):
     def __init__(self, app, user):
         super().__init__(app)
 
+        self.time_label = None
+        self.return_button = None
         self.app = app  # Reference to the root application
         self.user = user
         self.remaining_time = int(user.get("remaining_time", 0))
@@ -35,14 +36,14 @@ class MainTab(ctk.CTkFrame):
         # Greeting
         self.greeting_label = ctk.CTkLabel(
             self.content_frame,
-            text=f"Hello, {user['displayName']}!",
+            text=f"שלום, {user['displayName']}!",
             font=("Roboto", 30, "bold"),
             text_color="#FFFFFF"
         )
         self.greeting_label.grid(row=0, column=0, pady=(0, 20))
 
         # Remaining Time Label
-        self.remaining_time_var = ctk.StringVar(value=f"Remaining Time: {format_time(self.remaining_time)}")
+        self.remaining_time_var = ctk.StringVar(value=f"{format_time(self.remaining_time)} :שנותר זמן")  # Hebrew
         self.remaining_time_label = ctk.CTkLabel(
             self.content_frame,
             textvariable=self.remaining_time_var,
@@ -50,11 +51,6 @@ class MainTab(ctk.CTkFrame):
             text_color="#A9A9A9" if self.remaining_time == 0 else "#FFFFFF"
         )
         self.remaining_time_label.grid(row=1, column=0, pady=(0, 10))
-
-        # Progress Bar
-        self.progress_bar = ctk.CTkProgressBar(self.content_frame, width=400, height=15)
-        self.progress_bar.set(self.remaining_time / 60 / 60)  # Assuming 1 hour = 1.0
-        self.progress_bar.grid(row=2, column=0, pady=(0, 20))
 
         # Start Button
         self.start_button = ctk.CTkButton(
@@ -74,7 +70,7 @@ class MainTab(ctk.CTkFrame):
         # Logout Button
         self.logout_button = ctk.CTkButton(
             self.content_frame,
-            text="Logout",
+            text="התנתקות",
             command=self.logout,
             fg_color="#E74C3C",
             hover_color="#C0392B",
@@ -91,41 +87,76 @@ class MainTab(ctk.CTkFrame):
     def start_pc_usage(self):
         """Start the PC usage session."""
         if self.remaining_time <= 0:
-            messagebox.showinfo("No Time Remaining", "You have no remaining time.")
+            messagebox.showinfo("הזמן נגמר", "אין לך זמן שימוש במחשב.")
             logger.warning("User tried to start a session with no remaining time.")
+            return
+
+        if self.is_timer_running:
+            logger.warning("Timer is already running; start button should be disabled.")
             return
 
         logger.info("Starting PC usage session.")
         self.is_timer_running = True
         self.update_timer()
 
-        # Create an overlay
+        # Disable Start Button
+        self.start_button.configure(state="disabled")
+
+        # Minimize the application and stop restrictions
+        self.app.toggle_pc_access(True)
+
+        # Create a smaller overlay
         logger.info("Creating overlay for remaining time display.")
         self.overlay = ctk.CTkToplevel()
-        self.overlay.geometry("300x150+10+10")
+        self.overlay.geometry("150x50+10+10")  # Smaller overlay
         self.overlay.configure(fg_color="#2C2F33")
         self.overlay.overrideredirect(True)
         self.overlay.wm_attributes("-topmost", True)
 
-        time_label = ctk.CTkLabel(
+        # Time label in dd:hh:mm:ss format
+        self.time_label = ctk.CTkLabel(
             self.overlay,
-            textvariable=self.remaining_time_var,
-            font=("Roboto", 18),
+            text=format_time_dd_hh_mm_ss(self.remaining_time),
+            font=("Roboto", 16),
             text_color="#FFFFFF"
         )
-        time_label.pack(pady=10)
+        self.time_label.pack(fill="both", expand=True)
 
-        return_button = ctk.CTkButton(
-            self.overlay,
-            text="Return to Main",
-            command=self.return_to_main,
-            fg_color="#3498DB",
-            hover_color="#2980B9",
-            font=("Roboto", 16),
-            text_color="white"
-        )
-        return_button.pack(pady=10)
+        # Bind hover events to dynamically create/destroy the return button
+        self.overlay.bind("<Enter>", self.create_return_button)
+        self.overlay.bind("<Leave>", self.destroy_return_button)
+
         logger.info("Overlay initialized.")
+
+    def create_return_button(self, event=None):
+        """Dynamically create the return button."""
+        if not hasattr(self, "return_button") or self.return_button is None:
+            self.return_button = ctk.CTkButton(
+                self.overlay,
+                text="חזרה",
+                command=self.return_to_main,
+                fg_color="#3498DB",
+                hover_color="#2980B9",
+                font=("Roboto", 12),
+                text_color="white",
+                width=80,
+                height=30
+            )
+            self.return_button.pack(pady=(5, 0))
+            self.is_hovering = True  # Set flag to prevent flickering
+            logger.info("Return button created.")
+
+    def destroy_return_button(self, event=None):
+        """Dynamically destroy the return button."""
+        # Check if the pointer is still inside the overlay before destroying
+        x, y, width, height = (self.overlay.winfo_rootx(), self.overlay.winfo_rooty(),
+                               self.overlay.winfo_width(), self.overlay.winfo_height())
+        if not (x <= self.overlay.winfo_pointerx() <= x + width and
+                y <= self.overlay.winfo_pointery() <= y + height):
+            if hasattr(self, "return_button") and self.return_button:
+                self.return_button.destroy()
+                self.return_button = None
+                logger.info("Return button destroyed.")
 
     def return_to_main(self):
         """Return to the main tab and stop the timer."""
@@ -134,7 +165,15 @@ class MainTab(ctk.CTkFrame):
             self.overlay = None
             logger.info("Overlay destroyed.")
 
+        # Restore the application and enable restrictions
+        self.app.toggle_pc_access(False)
+
+        # Stop the timer
         self.is_timer_running = False
+
+        # Re-enable Start Button
+        self.start_button.configure(state="normal")
+
         logger.info("Returned to the main tab. Timer stopped.")
 
     def update_timer(self):
@@ -142,7 +181,10 @@ class MainTab(ctk.CTkFrame):
         if self.is_timer_running and self.remaining_time > 0:
             self.remaining_time -= 1
             self.update_remaining_time_label()
-            self.progress_bar.set(self.remaining_time / 60 / 60)
+
+            # Update the overlay time label
+            if self.overlay and self.time_label:
+                self.time_label.configure(text=format_time_dd_hh_mm_ss(self.remaining_time))
 
             logger.debug(f"Timer updated: {self.remaining_time} seconds remaining.")
             self.after(1000, self.update_timer)
@@ -150,12 +192,12 @@ class MainTab(ctk.CTkFrame):
             self.remaining_time = 0
             self.is_timer_running = False
             logger.info("User session ended due to time running out.")
-            messagebox.showinfo("Time Up", "Your session has ended. Logging out.")
+            messagebox.showinfo("נגמר הזמן", "זמן השימוש במחשב נגמר. מתנתק.")
             self.logout()
 
     def update_remaining_time_label(self):
         """Update the remaining time label."""
-        self.remaining_time_var.set(f"Remaining Time: {format_time(self.remaining_time)}")
+        self.remaining_time_var.set(f"{format_time(self.remaining_time)} :שנותר זמן")
         self.remaining_time_label.configure(
             text_color="#A9A9A9" if self.remaining_time == 0 else "#FFFFFF"
         )
@@ -181,9 +223,8 @@ class MainTab(ctk.CTkFrame):
         try:
             FirebaseAuth.logout(self.user)
             logger.info("User logged out successfully.")
-            messagebox.showinfo("Logout", "Your time has been saved. You have been logged out.")
             from screens.login import LoginScreen
             self.app.switch_frame(LoginScreen)
         except Exception as e:
             logger.error(f"Logout failed: {e}")
-            messagebox.showerror("Error", f"Failed to log out: {e}")
+            messagebox.showerror("שגיאה", f"{e} :שגיאה במהלך התנתקות")

@@ -20,14 +20,17 @@ class MainUI(ctk.CTkFrame):
         logger.info("Tabview created")
 
         # Add tabs to the tabview
-        main_frame = self.tabview.add("Main")
-        logger.info("Main tab added")
-        packages_frame = self.tabview.add("Packages")
-        logger.info("Packages tab added")
-        history_frame = self.tabview.add("History")
-        logger.info("History tab added")
-        help_frame = self.tabview.add("Help")
+
+        help_frame = self.tabview.add("עזרה")
         logger.info("Help tab added")
+        history_frame = self.tabview.add("היסטוריה")
+        logger.info("History tab added")
+        packages_frame = self.tabview.add("חבילות")
+        logger.info("Packages tab added")
+        main_frame = self.tabview.add("ראשי")
+        logger.info("Main tab added")
+
+        self.tabview.set("ראשי")
 
         # Populate tabs with their respective frames
         self.main_tab = MainTab(self.master, self.user)  # Pass App reference and user data

@@ -77,16 +77,13 @@ class LoginScreen(ctk.CTkFrame):
         password = self.password_entry.get()
         logger.info(f"Attempting login for email: {email}")
 
-        # Call to the authentication system
         response = FirebaseAuth.login(email, password)
 
         if "error" in response:
             logger.error(f"Login failed: {response['error']}")
             messagebox.showerror("שגיאה", response["error"])  # Show error in Hebrew
         else:
-            logger.info("Login successful")
-            messagebox.showinfo("הצלחה", "התחברת בהצלחה!")  # Login successful in Hebrew
-            logger.info("Navigating to MainUI")
+            logger.info("Login successful, Navigating to MainUI")
             self.master.switch_frame(MainUI, response)
 
     def go_to_register(self, event=None):

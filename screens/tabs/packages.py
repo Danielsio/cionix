@@ -3,7 +3,6 @@ from tkinter import messagebox
 from config import db
 from util.logger import logger
 
-
 class PackagesTab(ctk.CTkFrame):
     def __init__(self, master, user):
         super().__init__(master)
@@ -23,7 +22,7 @@ class PackagesTab(ctk.CTkFrame):
         # Title
         self.title_label = ctk.CTkLabel(
             self.content_frame,
-            text="Available Packages",
+            text="חבילות זמינות",  # Hebrew for "Available Packages"
             font=("Roboto", 24, "bold"),
             text_color="#FFFFFF"
         )
@@ -61,7 +60,7 @@ class PackagesTab(ctk.CTkFrame):
             # Package details
             label = ctk.CTkLabel(
                 frame,
-                text=f"{package['name']} - {package['minutes']} mins - ${package['price']}",
+                text=f"{package['name']} - {package['minutes']} דקות - ₪{package['price']}",  # Hebrew
                 font=("Roboto", 18),
                 text_color="#FFFFFF"
             )
@@ -70,7 +69,7 @@ class PackagesTab(ctk.CTkFrame):
             # Buy Button
             buy_button = ctk.CTkButton(
                 frame,
-                text="Buy",
+                text="רכוש",  # Hebrew for "Buy"
                 command=lambda p=package: self.handle_purchase(p),
                 fg_color="#4CAF50",
                 hover_color="#45A049",
@@ -85,7 +84,7 @@ class PackagesTab(ctk.CTkFrame):
         """Display an error message if no packages are found."""
         error_label = ctk.CTkLabel(
             self.content_frame,
-            text="No packages available at the moment. Please try again later.",
+            text="אין חבילות זמינות כרגע. נסה שוב מאוחר יותר.",
             font=("Roboto", 16),
             text_color="red"
         )
@@ -112,12 +111,12 @@ class PackagesTab(ctk.CTkFrame):
 
             # Success message
             messagebox.showinfo(
-                "Purchase Successful",
-                f"You have purchased {package['name']}! Your remaining time is now {self.user['remaining_time']} minutes."
+                "רכישה הצליחה",  # Hebrew for "Purchase Successful"
+                f"רכשת את {package['name']}! הזמן שנותר שלך כעת הוא {self.user['remaining_time']} דקות."
             )
         except Exception as e:
             logger.error(f"Error during purchase: {e}")
             messagebox.showerror(
-                "Purchase Failed",
-                "An error occurred while processing your purchase. Please try again later."
+                "רכישה נכשלה",  # Hebrew for "Purchase Failed"
+                "אירעה שגיאה במהלך עיבוד הרכישה. אנא נסה שוב מאוחר יותר."
             )

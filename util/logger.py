@@ -29,7 +29,7 @@ if os.path.exists(OLD_LOG_FILE):
         print(f"Failed to remove old log file: {e}")
 
 # Check if the logger is already configured to avoid reinitialization
-if not logging.getLogger("PCUsageManager").hasHandlers():
+if not logging.getLogger("Cionix").hasHandlers():
     # Configure logging
     logging.basicConfig(
         level=logging.DEBUG,
@@ -41,7 +41,7 @@ if not logging.getLogger("PCUsageManager").hasHandlers():
     )
 
 # Create a logger instance
-logger = logging.getLogger("PCUsageManager")
+logger = logging.getLogger("Cionix")
 
 # Log application start
 logger.info("Logger initialized.")

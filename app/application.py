@@ -78,3 +78,18 @@ class App(ctk.CTk):
         except Exception as e:
             logger.error(f"Failed to switch to {frame_class.__name__}: {e}")
             raise
+
+    def toggle_pc_access(self, minimize):
+        """Toggle PC access: minimize the application and stop restrictions, or restore and start restrictions."""
+        if minimize:
+            logger.info("Minimizing application and stopping restrictions.")
+            self.attributes("-fullscreen", False)
+            self.overrideredirect(False)
+            self.iconify()
+            self.restriction_manager.stop_restrictions()
+        else:
+            logger.info("Restoring application and starting restrictions.")
+            self.deiconify()
+            self.attributes("-fullscreen", True)
+            self.overrideredirect(True)
+            self.restriction_manager.start_restrictions()
